@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="styles/styles.css" />
+		<link rel="stylesheet" href="styles/gridPanelHeader.css" />
+		<link rel="stylesheet" href="styles/gridPanelTable.css" />
+		<link rel="stylesheet" href="styles/modal.css" />
+		<title>H2HBABBA2326 - Milestones</title>
+	</head>
+	<body>
+		<!-- NavBar -->
+		<nav>
+			<div class="nav__customer">
+				<image src="images/customer.svg" height="35" width="220" />
+			</div>
+			<div class="nav__highradiuslogo">
+				<image src="images/logo.svg" height="36" width="180" />
+			</div>
+			<div></div>
+		</nav>
+
+		<!-- Header -->
+		<header class="header">
+			<p>Invoice List</p>
+		</header>
+
+		<!-- Grid -->
+		<section>
+			<div class="gridPanel">
+				<!-- GridHeader -->
+				<div class="gridPanel__header">
+					<button class="gridPanel__headerAdd" id="addBtn"><img src="images/plus_add.svg" />Add</button>
+					<button class="gridPanel__headerEdit disable" id="editBtn" disabled><img src="images/edit.svg" />Edit</button>
+					<button class="gridPanel__headerDelete disable" id="deleteBtn" disabled><img src="images/minus.svg" />Delete</button>
+					<div class="gridPanel__headerInput">
+						<input type="text" id="searchInvoice" placeholder="Search by Invoice Number" />
+						<image src="images/search.svg" />
+					</div>
+				</div>
+				<!-- GridTable -->
+				<div class="gridPanel__table">
+					<table>
+						<thead>
+							<tr>
+								<th class="gridPanel__tableCheckbox">
+									<label class="container">
+										<input type="checkbox" onclick="checkAll(this)" />
+										<span class="checkimg"></span>
+									</label>
+								</th>
+								<th class="gridPanel__tableCustomerName">Customer Name</th>
+								<th class="gridPanel__tableCustomer">Customer #</th>
+								<th class="gridPanel__tableInvoice">Invoice #</th>
+								<th class="gridPanel__tableAmount">Invoice Amount</th>
+								<th class="gridPanel__tableDue">Due Date</th>
+								<th class="gridPanel__tablePayDate">Predicted Payement Date</th>
+								<th class="gridPanel__tableNotes">Notes</th>
+							</tr>
+						</thead>
+						<tbody id="gridPanel__tableData"></tbody>
+					</table>
+				</div>
+			</div>
+		</section>
+
+		<!-- AddModal -->
+		<div id="addModal" class="modal">
+			<div class="modal__content">
+				<div class="modal__header">
+					<span class="close addclose"><img src="images/baseline-close-24px.svg" /></span>
+					<h3>Add Invoice</h3>
+				</div>
+				<form id="addForm">
+					<div class="modal__body">
+						<div class="grid__container">
+							<div class="grid__containerLeft">
+								<label class="form__label">
+									<span class="required">Customer Name</span>
+									<input id="addCustName" type="text" required/>
+								</label>
+								<label class="form__label">
+									<span class="required">Customer No.</span>
+									<input id="addCustNo" type="text" required/>
+								</label>
+								<label class="form__label">
+									<span class="required">Invoice No.</span>
+									<input id="addInvoiceNo" type="text" required/>
+								</label>
+								<label class="form__label">
+									<span class="required">Invoice Amount</span>
+									<input id="addAmount" type="text" required/>
+								</label>
+							</div>
+							<div class="grid__containerRight">
+								<label class="form__label">
+									<span class="required">Due Date</span>
+									<input id="addDueDate" type="date" required/>
+								</label>
+								<label class="form__label">
+									<span style="vertical-align: top">Notes</span>
+									<textarea id="addNotes"></textarea>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="modal__footer">
+						<input type="button" class="modal__footerCancel addfclose" value="Cancel" />
+						<input type="submit" class="modal__footerAdd disabled" value="Add" disabled="disabled"/>
+						<input type="button" class="modal__footerClear-add" value="Clear" />
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!--Edit Modal -->
+		<div id="editModal" class="modal">
+			<div class="modal__content edit__content">
+				<div class="modal__header">
+					<span class="close editclose"><img src="images/baseline-close-24px.svg" /></span>
+					<h3>Edit Invoice</h3>
+				</div>
+				<form id="editForm">
+					<div class="modal__body">
+						<div class="edit__container">
+						<label class="form__label">
+							<span>Invoice Amount</span>
+							<input id="editAmount" type="text" required/>
+						</label>
+						<label class="form__label">
+							<span style="vertical-align: top">Notes</span>
+							<textarea id="editNotes"></textarea>
+						</label>
+					</div>
+					</div>
+					<div class="modal__footer">
+						<input type="button" class="modal__footerCancel editfclose" value="Cancel" />
+						<input type="submit" class="modal__footerEdit" value="Edit"/>
+						<input type="button" class="modal__footerClear-edit" value="Reset" />
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!--Delete Modal -->
+		<div id="deleteModal" class="modal">
+			<div class="modal__content delete__content">
+				<div class="modal__header">
+					<span class="close deleteclose"><img src="images/baseline-close-24px.svg" /></span>
+					<h3>Delete record(s)?</h3>
+				</div>
+					<div class="modal__body">
+						<div class="delete__container">
+							<p>You'll lose your record(s) after this action. We can't recover them once you delete. </p>
+							<p>Are you sure you want to <span class="red">permanently delete</span> them?</p>
+					  </div>
+					</div>
+					<div class="modal__footer delfooter">
+						<input type="submit" class="modal__footerEdit" value="Delete"/>
+						<input type="button" class="modal__footerCancel deletefclose" value="Cancel" />
+					</div>
+			</div>
+		</div>
+
+		<script src="js/index.js"></script>
+	</body>
+</html>
