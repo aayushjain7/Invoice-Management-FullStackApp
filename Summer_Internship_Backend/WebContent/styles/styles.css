@@ -48,7 +48,7 @@ section {
 
 .gridPanel {
 	width: 101%;
-	height: 450px;
+	height: 455px !important;
 	background: #273d49cc 0% 0% no-repeat padding-box;
 	border-radius: 10px;
 	opacity: 1;

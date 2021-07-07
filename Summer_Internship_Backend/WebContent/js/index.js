@@ -1,62 +1,100 @@
-const data = [
-	{
-		id: 1,
-		checked: false,
-		cust_name: 'Aayush Jain',
-		cust_no: 163265156,
-		invoice_no: 516845156,
-		invoice_amount: 25000,
-		due_date: '2020-06-29',
-		clear_date: '2020-06-31',
-		delay: 2,
-		notes: 'invoice will be cleared late',
-	},
-	{
-		id: 2,
-		checked: false,
-		cust_name: 'Varnika Sharma',
-		cust_no: 163265156,
-		invoice_no: 917846056,
-		invoice_amount: 35900,
-		due_date: '2020-06-29',
-		clear_date: '2020-06-21',
-		delay: -8,
-		notes: 'invoice to be cleared timely',
-	},
-];
+// const data = [
+// 	{
+// 		name_customer: 'aayush jain',
+// 		cust_number: '1234',
+// 		invoice_id: 19874555,
+// 		total_open_amount: 1000,
+// 		due_in_date: '2021-06-07',
+// 		clear_date: null,
+// 		delay: 0,
+// 		notes: 'hey hey hey',
+// 	},
+// 	{
+// 		name_customer: 'WR co',
+// 		cust_number: '0100000272',
+// 		invoice_id: 1930425959,
+// 		total_open_amount: 37708,
+// 		due_in_date: '2020-04-13',
+// 		clear_date: '2020-04-16',
+// 		delay: 3,
+// 		notes: 'invoice will be cleared late',
+// 	},
+// 	{
+// 		name_customer: 'DARDEN D llc',
+// 		cust_number: '0200229974',
+// 		invoice_id: 1930538929,
+// 		total_open_amount: 18132,
+// 		due_in_date: '2020-12-14',
+// 		clear_date: '2020-03-12',
+// 		delay: -1,
+// 		notes: 'invoice to be cleared timely',
+// 	},
+// 	{
+// 		name_customer: 'SYSCO F',
+// 		cust_number: '0200736337',
+// 		invoice_id: 1930539475,
+// 		total_open_amount: 7795,
+// 		due_in_date: '2020-03-31',
+// 		clear_date: '2020-04-03',
+// 		delay: 3,
+// 		notes: 'invoice will be cleared late',
+// 	},
+// ];
+var data = [];
+
+const URL = 'http://localhost:8080/H2HBABBA2326';
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const dateFormat = (d) => {
 	let t = new Date(d);
 	return t.getDate() + '-' + monthNames[t.getMonth()] + '-' + t.getFullYear();
-}
+};
 const amountFormat = (amount) => {
-	return amount/1000+'K';
-}
+	return amount / 1000 + 'K';
+};
 
-//Display Table Data
+// //Display Table Data
 const buildTable = (invoices) => {
+	console.log(invoices, 'sxh');
 	let table = document.getElementById('gridPanel__tableData');
 	invoices.map((invoice) => {
 		let row = `<tr>
 								<td class="gridPanel__tableCheckbox">
 									<label class="container" style="margin-left: 7px">
-										<input type="checkbox" name="checkall" id="${invoice.id}" onclick="check(this)"/>
+										<input type="checkbox" name="checkall" id="${invoice.invoice_id}" onclick="check(this)"/>
 										<span class="checkimg"></span>
 									</label>
 								</td>
-							  <td class="gridPanel__tableCustomerName">${invoice.cust_name}</td>
-								<td class="gridPanel__tableCustomer">${invoice.cust_no}</td>
-								<td class="gridPanel__tableInvoice">${invoice.invoice_no}</td>
-								<td class="gridPanel__tableAmount">${amountFormat(invoice.invoice_amount)}</td>
-								<td class="gridPanel__tableDue ${invoice.delay > 0 ? 'red' : ''}">${dateFormat(invoice.due_date)}</td>
+							  <td class="gridPanel__tableCustomerName">${invoice.name_customer}</td>
+								<td class="gridPanel__tableCustomer">${invoice.cust_number}</td>
+								<td class="gridPanel__tableInvoice">${invoice.invoice_id}</td>
+								<td class="gridPanel__tableAmount">${amountFormat(invoice.total_open_amount)}</td>
+								<td class="gridPanel__tableDue ${invoice?.delay > 0 ? 'red' : ''}">${dateFormat(invoice.due_in_date)}</td>
 								<td class="gridPanel__tablePayDate">${dateFormat(invoice.clear_date)}</td>
 								<td class="gridPanel__tableNotes">${invoice.notes}</td>
 							</tr>`;
 		table.innerHTML += row;
 	});
-}
-buildTable(data);
+};
+const loadInitialTable = () => {
+	try {
+		fetch(URL + '/GetInvoicesServlet')
+			.then((res) => {
+				return res.json();
+			})
+			.then((json_res) => {
+				json_res.map((d) => {
+					d.checked = false;
+				})
+				data = json_res;
+				buildTable(data);
+			});
+	} catch (e) {
+		console.log(e);
+	}
+};
+loadInitialTable();
+//buildTable(data);
 
 //CheckAll/Single
 const checkAll = (rows) => {
@@ -64,7 +102,7 @@ const checkAll = (rows) => {
 	for (let i = 0; i < checkboxes.length; i++) {
 		checkboxes[i].checked = rows.checked;
 		data[i].checked = rows.checked;
-		let row = document.getElementById(data[i].id).parentNode.parentNode.parentNode;
+		let row = document.getElementById(data[i].invoice_id).parentNode.parentNode.parentNode;
 		if (rows.checked) {
 			row.classList.add('select_row');
 		} else row.classList.remove('select_row');
@@ -78,11 +116,12 @@ const checkAll = (rows) => {
 		disableHeaderAddBtn(false);
 		disableHeaderDeleteBtn(true);
 	}
-}
+};
 
 const check = (row) => {
 	let tableRow = row.parentNode.parentNode.parentNode;
-	let invoice = data.filter((d) => d.id == row.id);
+	let invoice = data.filter((d) => d.invoice_id == row.id);
+	console.log(invoice)
 	if (row.checked) {
 		tableRow.classList.add('select_row');
 		invoice[0].checked = true;
@@ -90,14 +129,14 @@ const check = (row) => {
 		tableRow.classList.remove('select_row');
 		invoice[0].checked = false;
 	}
-	let invoices_checked = data.filter((invoice) => invoice.checked===true)
-	console.log(invoices_checked)
+	let invoices_checked = data.filter((invoice) => invoice.checked === true);
+	console.log(invoices_checked);
 	let lenChecked = invoices_checked.length;
-	if(lenChecked===0){
+	if (lenChecked === 0) {
 		disableHeaderAddBtn(false);
 		disableHeaderEditBtn(true);
 		disableHeaderDeleteBtn(true);
-	} else if (lenChecked===1) {
+	} else if (lenChecked === 1) {
 		disableHeaderAddBtn(true);
 		disableHeaderEditBtn(false);
 		disableHeaderDeleteBtn(false);
@@ -106,23 +145,23 @@ const check = (row) => {
 		disableHeaderEditBtn(true);
 		disableHeaderDeleteBtn(false);
 	}
-}
+};
 
 const disableHeaderAddBtn = (disable) => {
 	let addBtn = document.getElementById('addBtn');
 	addBtn.disabled = disable;
 	disable ? addBtn.classList.add('disable') : addBtn.classList.remove('disable');
-}
+};
 const disableHeaderEditBtn = (disable) => {
 	let editBtn = document.getElementById('editBtn');
 	editBtn.disabled = disable;
 	disable ? editBtn.classList.add('disable') : editBtn.classList.remove('disable');
-}
+};
 const disableHeaderDeleteBtn = (disable) => {
 	let delBtn = document.getElementById('deleteBtn');
 	delBtn.disabled = disable;
 	disable ? delBtn.classList.add('disable') : delBtn.classList.remove('disable');
-}
+};
 
 //Add Modal
 let addmodal = document.getElementById('addModal');
@@ -144,7 +183,7 @@ addclear.onclick = function () {
 };
 let addForm = document.getElementById('addForm');
 let required_inputs = addForm.querySelectorAll('input[required]');
-let register = addForm.querySelector('input[type="submit"]');
+let addSubmit = addForm.querySelector('input[type="submit"]');
 addForm.addEventListener('keyup', function () {
 	let disabled = false;
 	console.log(required_inputs);
@@ -154,11 +193,11 @@ addForm.addEventListener('keyup', function () {
 		}
 	});
 	if (disabled) {
-		register.setAttribute('disabled', 'disabled');
-		register.classList.add('disabled');
+		addSubmit.setAttribute('disabled', 'disabled');
+		addSubmit.classList.add('disabled');
 	} else {
-		register.removeAttribute('disabled');
-		register.classList.remove('disabled');
+		addSubmit.removeAttribute('disabled');
+		addSubmit.classList.remove('disabled');
 	}
 });
 
@@ -169,7 +208,7 @@ let editspan = document.getElementsByClassName('editclose')[0];
 let editfooter = document.getElementsByClassName('editfclose')[0];
 editbtn.onclick = function () {
 	editmodal.style.display = 'block';
-	let invoice = data.filter(d => d.checked===true)[0];
+	let invoice = data.filter((d) => d.checked === true)[0];
 	document.getElementById('editAmount').value = invoice.invoice_amount;
 	document.getElementById('editNotes').value = invoice.notes;
 };
@@ -211,19 +250,19 @@ window.onclick = function (event) {
 
 //search by invoice
 let searchInvoice = document.getElementById('searchInvoice');
-searchInvoice.addEventListener('keyup', function() {
+searchInvoice.addEventListener('keyup', function () {
 	let filter = searchInvoice.value.toUpperCase();
-	let table = document.getElementById("gridPanel__tableData");
+	let table = document.getElementById('gridPanel__tableData');
 	let tr = table.getElementsByTagName('tr');
-	for(let i=0; i<tr.length; i++){
-		let td = tr[i].getElementsByTagName("td")[3];
+	for (let i = 0; i < tr.length; i++) {
+		let td = tr[i].getElementsByTagName('td')[3];
 		if (td) {
 			txtValue = td.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
+			if (txtValue.toUpperCase().indexOf(filter) > -1) {
+				tr[i].style.display = '';
+			} else {
+				tr[i].style.display = 'none';
+			}
 		}
 	}
-})
+});
