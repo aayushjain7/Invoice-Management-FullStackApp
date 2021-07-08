@@ -55,7 +55,7 @@ const amountFormat = (amount) => {
 
 // //Display Table Data
 const buildTable = (invoices) => {
-	console.log(invoices, 'sxh');
+	console.log(invoices, 'invoices');
 	let table = document.getElementById('gridPanel__tableData');
 	invoices.map((invoice) => {
 		let row = `<tr>
@@ -70,30 +70,43 @@ const buildTable = (invoices) => {
 								<td class="gridPanel__tableInvoice">${invoice.invoice_id}</td>
 								<td class="gridPanel__tableAmount">${amountFormat(invoice.total_open_amount)}</td>
 								<td class="gridPanel__tableDue ${invoice?.delay > 0 ? 'red' : ''}">${dateFormat(invoice.due_in_date)}</td>
-								<td class="gridPanel__tablePayDate">${dateFormat(invoice.clear_date)}</td>
+								<td class="gridPanel__tablePayDate">${invoice.clear_date ? dateFormat(invoice.clear_date) : '--'}</td>
 								<td class="gridPanel__tableNotes">${invoice.notes}</td>
 							</tr>`;
 		table.innerHTML += row;
 	});
 };
-const loadInitialTable = () => {
+
+const loadInitialTable = async () => {
 	try {
-		fetch(URL + '/GetInvoicesServlet')
-			.then((res) => {
-				return res.json();
-			})
-			.then((json_res) => {
-				json_res.map((d) => {
-					d.checked = false;
-				})
-				data = json_res;
-				buildTable(data);
-			});
+		const res = await fetch(URL + '/GetInvoicesServlet');
+		const json_res = await res.json();
+		json_res.map((d) => (d.checked = false));
+		data = json_res;
+		buildTable(data);
 	} catch (e) {
-		console.log(e);
+		alert(e);
 	}
 };
 loadInitialTable();
+
+// const loadInitialTable = () => {
+// 	try {
+// 		fetch(URL + '/GetInvoicesServlet')
+// 			.then((res) => {
+// 				return res.json();
+// 			})
+// 			.then((json_res) => {
+// 				json_res.map((d) => {
+// 					d.checked = false;
+// 				})
+// 				data = json_res;
+// 				buildTable(data);
+// 			});
+// 	} catch (e) {
+// 		console.log(e);
+// 	}
+// };
 //buildTable(data);
 
 //CheckAll/Single
@@ -121,7 +134,7 @@ const checkAll = (rows) => {
 const check = (row) => {
 	let tableRow = row.parentNode.parentNode.parentNode;
 	let invoice = data.filter((d) => d.invoice_id == row.id);
-	console.log(invoice)
+	console.log(invoice);
 	if (row.checked) {
 		tableRow.classList.add('select_row');
 		invoice[0].checked = true;
@@ -178,15 +191,14 @@ addfooter.onclick = function () {
 	addmodal.style.display = 'none';
 };
 let addclear = document.getElementsByClassName('modal__footerClear-add')[0];
-addclear.onclick = function () {
-	document.getElementById('addForm').reset();
-};
 let addForm = document.getElementById('addForm');
+addclear.onclick = function () {
+	addForm.reset();
+};
 let required_inputs = addForm.querySelectorAll('input[required]');
 let addSubmit = addForm.querySelector('input[type="submit"]');
 addForm.addEventListener('keyup', function () {
 	let disabled = false;
-	console.log(required_inputs);
 	required_inputs.forEach(function (input, index) {
 		if (input.value === '' || !input.value.replace(/\s/g, '').length) {
 			disabled = true;
@@ -201,6 +213,30 @@ addForm.addEventListener('keyup', function () {
 	}
 });
 
+const submitInvoice = async () => {
+	let notes_input = addForm.querySelectorAll('textarea');
+	let new_cust_number = required_inputs[1].value;
+	let new_name_customer = required_inputs[0].value;
+	let new_invoice_id = required_inputs[2].value;
+	let new_total_open_amount = required_inputs[3].value;
+	let new_due_in_date = required_inputs[4].value;
+	let new_notes = notes_input[0].value;
+	const send_data = {
+		cust_number: new_cust_number,
+		name_customer: new_name_customer,
+		invoice_id: new_invoice_id,
+		total_open_amount: new_total_open_amount,
+		due_in_date: new_due_in_date,
+		notes: new_notes,
+	};
+	console.log(JSON.stringify(send_data));
+	await fetch(URL + '/AddInvoiceServlet', {
+		method: 'POST',
+		body: JSON.stringify(send_data),
+	});
+	window.location.reload();
+};
+
 //Edit Modal
 let editmodal = document.getElementById('editModal');
 let editbtn = document.getElementById('editBtn');
@@ -209,7 +245,7 @@ let editfooter = document.getElementsByClassName('editfclose')[0];
 editbtn.onclick = function () {
 	editmodal.style.display = 'block';
 	let invoice = data.filter((d) => d.checked === true)[0];
-	document.getElementById('editAmount').value = invoice.invoice_amount;
+	document.getElementById('editAmount').value = invoice.total_open_amount;
 	document.getElementById('editNotes').value = invoice.notes;
 };
 editspan.onclick = function () {
@@ -219,8 +255,28 @@ editfooter.onclick = function () {
 	editmodal.style.display = 'none';
 };
 let editclear = document.getElementsByClassName('modal__footerClear-edit')[0];
+let editForm = document.getElementById('editForm');
 editclear.onclick = function () {
-	document.getElementById('editForm').reset();
+	editForm.reset();
+};
+
+const editInvoice = async () => {
+	let notes_input = editForm.querySelectorAll('textarea');
+	let editable_input = editForm.querySelectorAll('input');
+	let edited_total_open_amount = editable_input[0].value;
+	let edited_notes = notes_input[0].value;
+	let edited_invoice_id = data.filter((d) => d.checked === true)[0].invoice_id;
+	const edit_data = {
+		invoice_id: edited_invoice_id,
+		total_open_amount: edited_total_open_amount,
+		notes: edited_notes
+	}
+	console.log(JSON.stringify(edit_data))
+	await fetch(URL+'/EditInvoiceServlet', {
+		method: "PUT",
+		body: JSON.stringify(edit_data)
+	})
+	window.location.reload();
 };
 
 //DeleteModal
@@ -247,6 +303,23 @@ window.onclick = function (event) {
 		editmodal.style.display = 'none';
 	}
 };
+
+const deleteInvoice = async () => {
+	let checked_data = data.filter((d) => d.checked === true);
+	let delete_invoice_ids = checked_data.map(d => d.invoice_id);
+	const delete_data = {
+		invoice_ids: delete_invoice_ids
+	}
+	console.log(JSON.stringify(delete_data))
+	await fetch(URL+'/DeleteInvoiceServlet', {
+		method: "DELETE",
+		body: JSON.stringify(delete_data)
+	})
+	window.location.reload();
+};
+
+function handleForm(event) { event.preventDefault(); } 
+document.addEventListener('submit', handleForm);
 
 //search by invoice
 let searchInvoice = document.getElementById('searchInvoice');
