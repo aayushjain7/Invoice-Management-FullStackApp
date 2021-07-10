@@ -36,9 +36,19 @@ public class GetInvoicesServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		try {
 			Connection con = ConnectToDB.connectDB();
-			Statement smt = con.createStatement();
-			String query = "SELECT name_customer, cust_number, invoice_id, total_open_amount, due_in_date, clear_date, delay, notes from invoices LIMIT 10";
-			ResultSet rs = smt.executeQuery(query);
+			int page = Integer.parseInt(request.getParameter("page_no"));
+			
+			final int pages_per_row = 10;
+			int slot = page*pages_per_row;
+			
+			String query = "SELECT name_customer, cust_number, invoice_id, total_open_amount, due_in_date, clear_date, delay, notes from invoices LIMIT ?, ?";
+			PreparedStatement smt = con.prepareStatement(query);
+			
+			smt.setLong(1, slot);
+			smt.setLong(2, pages_per_row);
+			System.out.println(smt);
+			
+			ResultSet rs = smt.executeQuery();
 			
 			ArrayList<InvoicePojo> invoices = new ArrayList<>();
 			while(rs.next()) {
@@ -63,6 +73,7 @@ public class GetInvoicesServlet extends HttpServlet {
 			
 			out.print(res);
 			System.out.println(res);
+			
 			response.setStatus(200);
 			out.flush();
 			smt.close();
@@ -77,6 +88,7 @@ public class GetInvoicesServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
+		response.addHeader("Access-Control-Allow-Origin", "*");
 		doGet(request, response);
 	}
 

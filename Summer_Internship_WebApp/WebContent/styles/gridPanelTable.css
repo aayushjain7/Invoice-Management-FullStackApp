@@ -1,3 +1,7 @@
+.gridPanel__table {
+	display: flex;
+	margin: 0px -15px;
+}
 .gridPanel__table table {
 	width: 100%;
 	border-spacing: 0px;
@@ -7,6 +11,9 @@
 	font-size: 15px;
 	font-weight: 600;
 	color: #b6b6b6 !important;
+}
+.gridPanel__table td {
+	font-size: 16px;
 }
 
 .gridPanel__tableCheckbox input {
@@ -38,9 +45,9 @@
 }
 .gridPanel__tableCustomer,
 .gridPanel__tableInvoice {
-	width: 85px;
+	width: 80px;
 	text-align: right;
-	padding-right: 45px;
+	padding-right: 39px;
 }
 .gridPanel__tableDue {
 	width: 95px;
@@ -53,14 +60,14 @@
 	padding-right: 50px;
 }
 .gridPanel__tablePayDate {
-	width: 180px;
+	width: 175px;
 	text-align: right;
 	padding-right: 30px;
 }
 .gridPanel__tableNotes {
 	width: 200px;
 	text-align: left;
-	padding-left: 70px;
+	padding-left: 60px;
 }
 
 .gridPanel__table th,
@@ -78,4 +85,22 @@
 }
 .red {
 	color: #ff5b5b !important;
+}
+
+.nextPage, .prevPage {
+	height: 20px;
+	width: 20px;
+	border-radius: 50%;
+	margin-top: 13%;
+	padding: 5px;
+	background-color: #39495E;
+}
+
+.nextPage {
+	float: right;
+}
+
+.available{
+	background-color: #14AFF1;
+	cursor: pointer;
 }

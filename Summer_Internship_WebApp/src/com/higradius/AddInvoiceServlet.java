@@ -72,6 +72,7 @@ public class AddInvoiceServlet extends HttpServlet {
 			
 			smt.executeUpdate();
 			
+			response.setStatus(200);
 			smt.close();
 			con.close();
 		} catch(Exception e) {

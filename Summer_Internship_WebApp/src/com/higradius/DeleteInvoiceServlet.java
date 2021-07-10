@@ -12,16 +12,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class EditInvoiceServlet
+ * Servlet implementation class DeleteInvoiceServlet
  */
-@WebServlet("/EditInvoiceServlet")
-public class EditInvoiceServlet extends HttpServlet {
+@WebServlet("/DeleteInvoiceServlet")
+public class DeleteInvoiceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public EditInvoiceServlet() {
+    public DeleteInvoiceServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -43,40 +43,35 @@ public class EditInvoiceServlet extends HttpServlet {
 	}
 
 	/**
-	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
+	 * @see HttpServlet#doDelete(HttpServletRequest, HttpServletResponse)
 	 */
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		try {
 			BufferedReader br = request.getReader();
-			String edit_invoice = "", line=null;
+			String delete_json = "", line=null;
 			while ((line = br.readLine()) != null)
-			      edit_invoice+=line.trim();
-			System.out.println(edit_invoice);
-			edit_invoice =  edit_invoice.substring(1, edit_invoice.length() - 1);
-			String invoice_edit[] = edit_invoice.split(",");
-			for(int i=0; i<invoice_edit.length; i++) {
-				invoice_edit[i] = invoice_edit[i].split(":")[1].trim();
-				invoice_edit[i] = invoice_edit[i].substring(1, invoice_edit[i].length() - 1);
-				System.out.println(invoice_edit[i]);
-			}
+			      delete_json+=line.trim();
+			delete_json = delete_json.split(":")[1].trim();
+			delete_json = delete_json.substring(1, delete_json.length()-2);
+			System.out.println(delete_json);
 			
-			String invoice_id = invoice_edit[0];
-			String total_open_amount = invoice_edit[1];
-			String notes = invoice_edit[2];
-			
+			String delete_ids[] = delete_json.split(",");
 			Connection con = ConnectToDB.connectDB();
-			String query = "UPDATE invoices SET total_open_amount = ?, notes = ? WHERE invoice_id = ?";
-			PreparedStatement smt = con.prepareStatement(query);
-			
-			smt.setString(1, total_open_amount);
-			smt.setString(2, notes);
-			smt.setString(3, invoice_id);
-			System.out.println(smt);
-			smt.executeUpdate();
-			
-			smt.close();
+//			String query = "DELETE FROM invoices WHERE invoice_id IN (?)";
+//			PreparedStatement smt = con.prepareStatement(query);
+//			smt.setString(1, delete_json);
+			String query = "DELETE FROM invoices WHERE invoice_id = ?";
+			for(int i=0; i<delete_ids.length; i++) {
+				PreparedStatement smt = con.prepareStatement(query);
+				System.out.println(delete_ids[i].trim());
+				smt.setString(1, delete_ids[i].trim());
+				smt.executeUpdate();
+				smt.close();
+			}
+
 			con.close();
+			
 		} catch(Exception e) {
 			System.out.println(e);
 		}

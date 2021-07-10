@@ -41,6 +41,7 @@
 // 	},
 // ];
 var data = [];
+var page = 0;
 
 const URL = 'http://localhost:8080/H2HBABBA2326';
 
@@ -57,6 +58,7 @@ const amountFormat = (amount) => {
 const buildTable = (invoices) => {
 	console.log(invoices, 'invoices');
 	let table = document.getElementById('gridPanel__tableData');
+	table.innerHTML = ""
 	invoices.map((invoice) => {
 		let row = `<tr>
 								<td class="gridPanel__tableCheckbox">
@@ -79,7 +81,7 @@ const buildTable = (invoices) => {
 
 const loadInitialTable = async () => {
 	try {
-		const res = await fetch(URL + '/GetInvoicesServlet');
+		const res = await fetch(URL + `/GetInvoicesServlet?page_no=${page}`);
 		const json_res = await res.json();
 		json_res.map((d) => (d.checked = false));
 		data = json_res;
@@ -90,24 +92,39 @@ const loadInitialTable = async () => {
 };
 loadInitialTable();
 
-// const loadInitialTable = () => {
-// 	try {
-// 		fetch(URL + '/GetInvoicesServlet')
-// 			.then((res) => {
-// 				return res.json();
-// 			})
-// 			.then((json_res) => {
-// 				json_res.map((d) => {
-// 					d.checked = false;
-// 				})
-// 				data = json_res;
-// 				buildTable(data);
-// 			});
-// 	} catch (e) {
-// 		console.log(e);
-// 	}
-// };
-//buildTable(data);
+//pagination prev page
+const prevPage = async () => {
+	try {
+		const res = await fetch(URL + `/GetInvoicesServlet?page_no=${--page}`);
+		const json_res = await res.json();
+		json_res.map((d) => (d.checked = false));
+		data = json_res;
+		buildTable(data);
+		if (page == 0) {
+			let prevBtn = document.getElementsByClassName('prevPage')[0];
+			prevBtn.disabled = true;
+			prevBtn.classList.remove('available');
+		}
+	} catch (e) {
+		console.log(e);
+	}
+};
+
+//pagination next page
+const nextPage = async () => {
+	try {
+		const res = await fetch(URL + `/GetInvoicesServlet?page_no=${++page}`);
+		const json_res = await res.json();
+		json_res.map((d) => (d.checked = false));
+		data = json_res;
+		buildTable(data);
+		let prevBtn = document.getElementsByClassName('prevPage')[0];
+		prevBtn.disabled = true;
+		prevBtn.classList.add('available');
+	} catch (e) {
+		console.log(e);
+	}
+};
 
 //CheckAll/Single
 const checkAll = (rows) => {
@@ -269,13 +286,13 @@ const editInvoice = async () => {
 	const edit_data = {
 		invoice_id: edited_invoice_id,
 		total_open_amount: edited_total_open_amount,
-		notes: edited_notes
-	}
-	console.log(JSON.stringify(edit_data))
-	await fetch(URL+'/EditInvoiceServlet', {
-		method: "PUT",
-		body: JSON.stringify(edit_data)
-	})
+		notes: edited_notes,
+	};
+	console.log(JSON.stringify(edit_data));
+	await fetch(URL + '/EditInvoiceServlet', {
+		method: 'PUT',
+		body: JSON.stringify(edit_data),
+	});
 	window.location.reload();
 };
 
@@ -306,19 +323,21 @@ window.onclick = function (event) {
 
 const deleteInvoice = async () => {
 	let checked_data = data.filter((d) => d.checked === true);
-	let delete_invoice_ids = checked_data.map(d => d.invoice_id);
+	let delete_invoice_ids = checked_data.map((d) => d.invoice_id);
 	const delete_data = {
-		invoice_ids: delete_invoice_ids
-	}
-	console.log(JSON.stringify(delete_data))
-	await fetch(URL+'/DeleteInvoiceServlet', {
-		method: "DELETE",
-		body: JSON.stringify(delete_data)
-	})
+		invoice_ids: delete_invoice_ids,
+	};
+	console.log(JSON.stringify(delete_data));
+	await fetch(URL + '/DeleteInvoiceServlet', {
+		method: 'DELETE',
+		body: JSON.stringify(delete_data),
+	});
 	window.location.reload();
 };
 
-function handleForm(event) { event.preventDefault(); } 
+function handleForm(event) {
+	event.preventDefault();
+}
 document.addEventListener('submit', handleForm);
 
 //search by invoice
